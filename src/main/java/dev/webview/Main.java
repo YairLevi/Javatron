@@ -11,9 +11,7 @@ public class Main {
         });
 
         wv.bind("test", (arguments) -> {
-            for (String arg : arguments) {
-
-            }
+            System.out.println(arguments);
             return "";
         });
 
