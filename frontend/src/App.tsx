@@ -2,16 +2,31 @@ import {useEffect, useState} from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import { func } from "../javatron/binds";
+
+class Note {
+  title: string
+  content: string
+
+  constructor(title: string, content: string) {
+    this.title = title;
+    this.content = content;
+  }
+
+  save() {
+    // save to database
+  }
+}
 
 function App() {
   const [count, setCount] = useState(0)
 
+    async function run() {
+      const res = await func(new Note("Ttt", "Hello world"))
+      console.log(res as Note)
+    }
     useEffect(() => {
-        // @ts-ignore
-        window["echo"](1,2,3)
-            .then((res: any) => console.log(res))
-        // @ts-ignore
-        window["test"](1,2,3,4)
+        run()
     })
 
   return (

@@ -11,5 +11,4 @@ public interface WebviewBindCallback extends Function<String, String> {
      */
     @Override
     public String apply(String jsonArgs);
-
 }
