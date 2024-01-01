@@ -9,6 +9,7 @@ public class TestClass {
     int age;
     String name;
     float weight;
+    int counter = 0;
 
     public TestClass() {
         this.age = 1;
@@ -22,10 +23,26 @@ public class TestClass {
     }
 
     @BindMethod
-    public List<String> joinStrings(String s1, String s2) {
+    public void incrementAndPrint() {
+        this.counter++;
+        System.out.println("counter is now: " + this.counter);
+    }
+
+    @BindMethod
+    public void funcWithClassParam(Custom c) {
+
+    }
+
+    @BindMethod
+    public static List<String> joinStrings(String s1, String s2) {
         List<String> list = new ArrayList<>();
         list.add("hello");
         list.add(s1 + ":" + s2);
         return list;
+    }
+
+    @BindMethod
+    public void yes(List<String> list) {
+
     }
 }

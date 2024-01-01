@@ -1,5 +1,6 @@
 import './App.css'
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
+import {addTwoNumbers, incrementAndPrint, joinStrings} from "../javatron/methods/TestClass"
 
 function App() {
 
@@ -8,23 +9,25 @@ function App() {
     console.log(window)
   }, []);
 
-    function add() {
-        window["TestClass_addTwoNumbers"](1, 2)
-        .then(res => console.log(res, typeof res))
-        .catch(err => console.log(err))
-    }
+  const [state, setState] = useState(0)
 
-    function join() {
-        window["TestClass_joinStrings"]("This", "is")
-        .then(res => console.log(res, typeof res))
-        .catch(err => console.log(err))
-    }
+  function add() {
+    addTwoNumbers(1, 2)
+      .then(res => console.log(res))
+      .catch(err => console.log(err))
+  }
+
+  function join() {
+    incrementAndPrint()
+  }
 
   return (
     <>
       <p>Hello world!</p>
       <button onClick={add}>click</button>
-      <button onClick={join}>click list</button>
+      <button onClick={incrementAndPrint}>click list</button>
+      <button onClick={() => window["test_eval"]()}>test_eval</button>
+      <p>{state}</p>
     </>
   )
 }
