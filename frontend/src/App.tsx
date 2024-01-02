@@ -17,7 +17,11 @@ function App() {
       .catch(err => console.log(err))
   }
 
-  function join() {
+  function F(): Promise<void> {
+    return
+  }
+
+  async function join() {
     incrementAndPrint()
   }
 

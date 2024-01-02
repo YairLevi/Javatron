@@ -116,8 +116,9 @@ public interface MethodBinder {
                         return name + ": " + type;
                     })
                     .collect(Collectors.joining(","));
-            String convertedReturnType = toJSType(method.getReturnType());
-            writer.write("export function " + methodName + "(" + argsString + "): Promise<" + convertedReturnType + ">;\n\n");
+            String convertedReturnType = TypeConverter.convert(method.getReturnType(), true);
+            String returnTypeString = convertedReturnType.equals("void") ? "" : ": Promise<"+convertedReturnType+">";
+            writer.write("export function " + methodName + "(" + argsString + ")" + returnTypeString + ";\n\n");
             System.out.println("----------");
         }
 

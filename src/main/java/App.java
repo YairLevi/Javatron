@@ -1,18 +1,21 @@
 import dev.webview.Webview;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public interface App {
-    String ClientURL = "http://localhost:5173";
+    String ClientURL = "frontend/index.html";//"http://localhost:5173";
 
     static void run() throws IOException {
         // init code
         FileManager.createNewFile(TypeConverter.TYPES_FILE_PATH);
 
-        TypeConverter.createTypeFromClass(
-                TestClass.class,
-                Custom.class
+        Custom c = new Custom();
+        TestClass t = new TestClass();
+
+        TypeConverter.generateTypes(
+                c, t
         );
         MethodBinder.createJavascriptFunctions(TestClass.class);
         MethodBinder.createTypescriptDeclarations(TestClass.class);
@@ -23,12 +26,10 @@ public interface App {
             return jsonElements;
         });
 
-        TestClass t = new TestClass();
         List<Handler> hs = MethodBinder.createHandlers(t);
         for (Handler h : hs) {
             if (h == null) continue;
             wv.bind(h.name, WebviewCallbackWrapper.getHandler(h));
-
         }
         wv.bind("test_eval", jsonElements -> {
             wv.eval("setState(c => c+1)");

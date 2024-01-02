@@ -11,6 +11,8 @@ public class TestClass {
     float weight;
     int counter = 0;
 
+    List<Custom> list;
+
     public TestClass() {
         this.age = 1;
         this.name = "Mike";
