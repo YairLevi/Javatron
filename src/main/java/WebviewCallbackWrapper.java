@@ -2,12 +2,11 @@ import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.element.JsonArray;
 import co.casterlabs.rakurai.json.element.JsonElement;
 import dev.webview.ConsumingProducer;
-import java.util.function.Function;
 
-public interface WebviewCallbackWrapper {
-    Rson r = new Rson.Builder().build();
+public final class WebviewCallbackWrapper {
+    private static final Rson r = new Rson.Builder().build();
 
-    static ConsumingProducer<JsonArray, JsonElement> getHandler(Handler handler) {
+    public static ConsumingProducer<JsonArray, JsonElement> wrap(Handler handler) {
         return jsonArray -> {
             try {
                 String jsonArrayAsString = String.valueOf(jsonArray);

@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 import static java.util.Map.entry;
 
 public interface TypeConverter {
-    String TYPES_FILE_PATH = "frontend/javatron/types.ts";
     Set<String> boundTypes = new HashSet<>();
 
     Map<String, String> jsTypes = Map.ofEntries(
@@ -37,37 +36,12 @@ public interface TypeConverter {
             entry("List", "Array")
     );
 
-    static void generateTypes(Object ...objects) {
-        try {
-            generateTypes((Class<?>[]) Arrays.stream(objects).map(Object::getClass).toArray());
-        } catch (IOException e) {
-            System.out.println("Failed to create types for frontend.");
-            e.printStackTrace();
-            System.exit(1);
+    static Class<?>[] getClasses(Object ...objects) {
+        Class<?>[] classes = new Class[objects.length];
+        for (int i = 0;  i < classes.length; i++) {
+            classes[i] = objects[i].getClass();
         }
-    }
-
-    static void generateTypes(Class<?>... classes) throws IOException {
-        FileWriter types = new FileWriter(TYPES_FILE_PATH, true);
-        Arrays.stream(classes).forEach(c -> boundTypes.add(c.getSimpleName()));
-
-        for (Class<?> clazz : classes) {
-            // Declare type and export
-            String typeName = clazz.getSimpleName();
-            types.write("export type " + clazz.getSimpleName() + " = {\n");
-
-            // Add fields and map the types from java to typescript
-            Field[] fields = clazz.getDeclaredFields();
-            for (Field field : fields) {
-                String name = field.getName();
-                String type = convert(field.getGenericType(), false);
-                types.write("\t" + name + ": " + type + "\n");
-            }
-            types.write("}\n\n");
-
-            System.out.println("Created type: " + typeName);
-        }
-        types.close();
+        return classes;
     }
 
     /**

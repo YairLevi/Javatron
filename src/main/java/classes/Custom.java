@@ -1,3 +1,5 @@
+package classes;
+
 import annotations.BindType;
 
 @BindType

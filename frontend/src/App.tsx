@@ -1,30 +1,8 @@
 import './App.css'
 import {useEffect, useState} from "react";
-import {addTwoNumbers, incrementAndPrint, joinStrings} from "../javatron/methods/TestClass"
+import {addTwoNumbers, incrementAndPrint, joinStrings} from "../javatron/methods/classes.TestClass"
 
 function App() {
-
-  useEffect(() => {
-//     window["echo"](1,2,3).then(res => console.log(res))
-    console.log(window)
-  }, []);
-
-  const [state, setState] = useState(0)
-
-  function add() {
-    addTwoNumbers(1, 2)
-      .then(res => console.log(res))
-      .catch(err => console.log(err))
-  }
-
-  function F(): Promise<void> {
-    return
-  }
-
-  async function join() {
-    incrementAndPrint()
-  }
-
   return (
     <>
       <p>Hello world!</p>

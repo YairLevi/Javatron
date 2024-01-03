@@ -34,6 +34,10 @@ public class Javatron {
         _webview.setSize(width, height);
     }
 
+    public void setURL(String url) {
+        _webview.loadURL(url);
+    }
+
     public void setMinSize(int minWidth, int minHeight) {
         _webview.setMinSize(minWidth, minHeight);
     }
@@ -51,7 +55,7 @@ public class Javatron {
     }
 
     public void invoke(String event) {
-        _webview.eval("window["+event+"]()");
+        _webview.eval("window.ipc["+event+"].handler()");
     }
 
     public void addBeforeStartCallback(Runnable r) {
@@ -63,7 +67,10 @@ public class Javatron {
     }
 
     public void run() {
-        TypeConverter.generateTypes(_bindObjects.toArray());
+        CodeGenerator.generateTypes(_bindObjects.toArray());
+        CodeGenerator.generateFunctions(_bindObjects.toArray());
+        MethodBinder.bind(_webview, _bindObjects.toArray());
+
         _beforeStartCallbacks.forEach(Runnable::run);
         _webview.run();
         _onCloseCallbacks.forEach(Runnable::run);

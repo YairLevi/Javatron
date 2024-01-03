@@ -1,4 +1,6 @@
+import java.util.function.Function;
+
 public class Handler {
     public String name;
-    public WebviewHandler callback;
+    public Function<String, Object> callback;
 }
