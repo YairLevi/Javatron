@@ -40,10 +40,10 @@ public final class CodeGenerator {
                 }
                 writer.write("}\n\n");
 
-                System.out.println("Created type: " + typeName);
+                Log.INFO("Created type: %s", typeName);
             }
         } catch (IOException e) {
-            System.out.println("Failed to create types for frontend.");
+            Log.SEVERE("Failed to create types for frontend.");
             e.printStackTrace();
             System.exit(1);
         } finally {
@@ -51,7 +51,7 @@ public final class CodeGenerator {
                 if (writer != null)
                     writer.close();
             } catch (IOException closeErr) {
-                System.out.println("Failed to close writer.");
+                Log.SEVERE("Failed to close writer.");
                 closeErr.printStackTrace();
             }
         }
@@ -84,7 +84,7 @@ public final class CodeGenerator {
                 writer.write("}\n\n");
             }
         } catch (IOException e) {
-            System.out.println("Failed to create javascript function for class " + c.getSimpleName() + ".");
+            Log.SEVERE("Failed to create javascript function for class %s.", c.getSimpleName());
             e.printStackTrace();
         } finally {
             try {
@@ -92,7 +92,7 @@ public final class CodeGenerator {
                     writer.close();
                 }
             } catch (IOException closeErr) {
-                System.out.println("Failed to close writer");
+                Log.INFO("Failed to close writer");
                 closeErr.printStackTrace();
             }
         }
@@ -117,32 +117,30 @@ public final class CodeGenerator {
 
             for (Method method : Arrays.stream(c.getDeclaredMethods()).sorted(Comparator.comparing(Method::getName)).toList()) {
                 if (!method.isAnnotationPresent(BindMethod.class)) continue;
-                System.out.println(method.getName());
+                Log.INFO("Created function %s of class %s", method.getName(), c.getSimpleName());
                 String methodName = method.getName();
                 Parameter[] params = method.getParameters();
                 String argsString = Arrays.stream(params)
                         .map(p -> {
                             String name = p.getName();
                             String type = toJSType(p.getType());
-                            System.out.println("type: " + type);
                             return name + ": " + type;
                         })
                         .collect(Collectors.joining(","));
                 String convertedReturnType = TypeConverter.convert(method.getReturnType(), true);
                 String returnTypeString = convertedReturnType.equals("void") ? "" : ": Promise<" + convertedReturnType + ">";
                 writer.write("export function " + methodName + "(" + argsString + ")" + returnTypeString + ";\n\n");
-                System.out.println("----------");
             }
         } catch (IOException e) {
-            System.out.println("Failed to create typescript declarations for class " + c.getSimpleName() + ".");
             e.printStackTrace();
+            Log.SEVERE("Failed to create typescript declarations for class %s.", c.getSimpleName());
         } finally {
             try {
                 if (writer != null) {
                     writer.close();
                 }
             } catch (IOException closeErr) {
-                System.out.println("Failed to close writer.");
+                Log.SEVERE("Failed to close writer.");
                 closeErr.printStackTrace();
             }
         }

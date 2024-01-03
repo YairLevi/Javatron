@@ -44,6 +44,16 @@ public interface TypeConverter {
         return classes;
     }
 
+    static String extractTypeName(String fullTypeName) {
+        // Split the full type name based on the dot (.) separator
+        String[] parts = fullTypeName.split("\\.");
+
+        // The last part of the split array is the type name
+        String typeName = parts[parts.length - 1];
+
+        return typeName;
+    }
+
     /**
      *
      * @param t the java type that needs conversion to javascript.
@@ -53,10 +63,8 @@ public interface TypeConverter {
      */
     static String convert(Type t, boolean addJTPrefix) {
         String type = t.getTypeName();
-
-        // Remove java builtin classes package prefix
-        type = type.replaceAll("java\\.lang\\.|java\\.util\\.", "");
-
+        // Remove java packages prefix
+        type = type.replaceAll("\\b[a-z]+\\.", "");
         // Remove part of classes that are a specific implementation of a generic class (List, etc.)
         type = type.replaceAll("Tree|Hash|Linked|Array", "");
 
@@ -69,7 +77,6 @@ public interface TypeConverter {
         // "System" for example won't be found in the keys, so it will remain System, and will not be "any".
         while (matcher.find()) {
             String javaType = matcher.group();
-            System.out.println("Java type: " + javaType);
             if (!jsTypes.containsKey(javaType) && !boundTypes.contains(javaType)) {
                 System.out.println("Type Error: java type " + javaType + " is not recognized. Did you forget to @BindType ?");
                 System.out.println("Used 'any' instead, just in case.");

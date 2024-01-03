@@ -1,8 +1,6 @@
-import "./window"
+import "./window.d.ts"
 
-type Callback = () => void
-
-export function addListener(event: string, callback: Callback) {
+export function addListener(event: string, callback: () => void) {
   if (window.ipc[event]) {
     window.ipc[event].callbacks.push(callback)
     return
@@ -14,7 +12,7 @@ export function addListener(event: string, callback: Callback) {
   }
 }
 
-export function removeListener(event: string, callback: Function) {
+export function removeListener(event: string, callback: () => void) {
   if (!window[event]) {
     return
   }

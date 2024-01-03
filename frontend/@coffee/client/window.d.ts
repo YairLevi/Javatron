@@ -6,3 +6,5 @@ interface Window {
     };
   };
 }
+
+window.ipc = {}
