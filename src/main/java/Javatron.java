@@ -59,10 +59,6 @@ public class Javatron {
         _bindObjects.addAll(Arrays.stream(objects).toList());
     }
 
-    public void invoke(String event) {
-        _webview.eval("window.ipc['"+event+"'].handler()");
-    }
-
     public void addBeforeStartCallback(Runnable r) {
         _beforeStartCallbacks.add(r);
     }

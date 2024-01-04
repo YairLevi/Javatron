@@ -1,7 +1,7 @@
 import annotations.BindMethod;
 
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 public final class CodeGenerator {
     private final static String CLIENT_FOLDER_PATH = "frontend/javatron/";
     private final static String METHODS_FOLDER_PATH = CLIENT_FOLDER_PATH + "methods/";
+    private final static String EVENTS_FOLDER_PATH = CLIENT_FOLDER_PATH + "events/";
     private final static String TYPES_FILE_PATH = CLIENT_FOLDER_PATH + "types.ts";
 
     static {
@@ -20,40 +21,31 @@ public final class CodeGenerator {
     }
 
     public static void generateTypes(Object... objects) {
-        FileWriter writer = null;
         try {
+            PrintWriter writer = new PrintWriter(TYPES_FILE_PATH);
             Class<?>[] classes = TypeConverter.getClasses(objects);
-            writer = new FileWriter(TYPES_FILE_PATH, true);
             Arrays.stream(classes).forEach(c -> TypeConverter.boundTypes.add(c.getSimpleName()));
-
-            for (Class<?> clazz : classes) {
+            for (Class<?> c : classes) {
                 // Declare type and export
-                String typeName = clazz.getSimpleName();
-                writer.write("export type " + clazz.getSimpleName() + " = {\n");
+                String typeName = c.getSimpleName();
+                writer.println("export type " + c.getSimpleName() + " = {");
 
                 // Add fields and map the types from java to typescript
-                Field[] fields = clazz.getDeclaredFields();
+                Field[] fields = c.getDeclaredFields();
                 for (Field field : fields) {
                     String name = field.getName();
                     String type = TypeConverter.convert(field.getGenericType(), false);
-                    writer.write("\t" + name + ": " + type + "\n");
+                    writer.println("\t" + name + ": " + type);
                 }
-                writer.write("}\n\n");
+                writer.println("}\n");
 
                 Log.INFO("Created type: %s", typeName);
             }
+            writer.close();
         } catch (IOException e) {
-            Log.SEVERE("Failed to create types for frontend.");
+            Log.SEVERE("Failed to generate a types file `types.ts`.");
             e.printStackTrace();
             System.exit(1);
-        } finally {
-            try {
-                if (writer != null)
-                    writer.close();
-            } catch (IOException closeErr) {
-                Log.SEVERE("Failed to close writer.");
-                closeErr.printStackTrace();
-            }
         }
     }
 
@@ -66,12 +58,11 @@ public final class CodeGenerator {
     }
 
     private static void createJavascriptFunctions(Class<?> c) {
-        FileWriter writer = null;
         try {
             String className = c.getSimpleName();
             String path = METHODS_FOLDER_PATH + className + ".js";
             FileManager.createOrReplaceFile(path);
-            writer = new FileWriter(path);
+            PrintWriter writer = new PrintWriter(path);
 
             for (Method method : c.getDeclaredMethods()) {
                 if (!method.isAnnotationPresent(BindMethod.class)) continue;
@@ -79,22 +70,16 @@ public final class CodeGenerator {
                 String methodName = method.getName();
                 Parameter[] params = method.getParameters();
                 String argsString = Arrays.stream(params).map(Parameter::getName).collect(Collectors.joining(","));
-                writer.write("export function " + methodName + "(" + argsString + ") {\n");
-                writer.write("\treturn window[\"" + className + "_" + methodName + "\"](" + argsString + ");\n");
-                writer.write("}\n\n");
+                writer.println("export function " + methodName + "(" + argsString + ") {");
+                writer.println("\treturn window[\"" + className + "_" + methodName + "\"](" + argsString + ");");
+                writer.println("}\n");
             }
+
+            writer.close();
         } catch (IOException e) {
             Log.SEVERE("Failed to create javascript function for class %s.", c.getSimpleName());
             e.printStackTrace();
-        } finally {
-            try {
-                if (writer != null) {
-                    writer.close();
-                }
-            } catch (IOException closeErr) {
-                Log.INFO("Failed to close writer");
-                closeErr.printStackTrace();
-            }
+            System.exit(1);
         }
     }
 
@@ -106,14 +91,13 @@ public final class CodeGenerator {
     }
 
     private static void createTypescriptDeclarations(Class<?> c) {
-        FileWriter writer = null;
         try {
             String className = c.getSimpleName();
             String path = METHODS_FOLDER_PATH + className + ".d.ts";
             FileManager.createOrReplaceFile(path);
-            writer = new FileWriter(path);
+            PrintWriter writer = new PrintWriter(path);
 
-            writer.write("import * as jt from '../types';\n\n");
+            writer.println("import * as jt from '../types';\n");
 
             for (Method method : Arrays.stream(c.getDeclaredMethods()).sorted(Comparator.comparing(Method::getName)).toList()) {
                 if (!method.isAnnotationPresent(BindMethod.class)) continue;
@@ -127,22 +111,20 @@ public final class CodeGenerator {
                             return name + ": " + type;
                         })
                         .collect(Collectors.joining(","));
+
                 String convertedReturnType = TypeConverter.convert(method.getReturnType(), true);
-                String returnTypeString = convertedReturnType.equals("void") ? "" : ": Promise<" + convertedReturnType + ">";
-                writer.write("export function " + methodName + "(" + argsString + ")" + returnTypeString + ";\n\n");
+                String returnTypeString = "Promise<" + convertedReturnType + ">";
+                if (convertedReturnType.equals("void"))
+                    returnTypeString = "";
+
+                writer.println("export function " + methodName + "(" + argsString + ")" + returnTypeString + ";\n");
             }
+
+            writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
             Log.SEVERE("Failed to create typescript declarations for class %s.", c.getSimpleName());
-        } finally {
-            try {
-                if (writer != null) {
-                    writer.close();
-                }
-            } catch (IOException closeErr) {
-                Log.SEVERE("Failed to close writer.");
-                closeErr.printStackTrace();
-            }
+            e.printStackTrace();
+            System.exit(1);
         }
     }
 }
