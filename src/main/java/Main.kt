@@ -1,18 +1,18 @@
-public class Main {
-    public static void main(String[] args) {
+import org.slf4j.LoggerFactory
 
-        Javatron jt = new Javatron();
-        jt.setSize(700, 700);
-        jt.setTitle("My first Javatron app!");
-        jt.setURL("http://localhost:5173");
+val log = LoggerFactory.getLogger("Main")
+fun main(args: Array<String>) {
+    val jt = Javatron()
+    jt.setSize(700, 700)
+    jt.setTitle("My first Javatron app!")
+    jt.url = "http://localhost:5173"
 
-        TestClass t = new TestClass();
-        Custom c = new Custom();
+    val t = TestClass()
+    val c = Custom()
 
-        jt.bind(c, t);
-        jt.addBeforeStartCallback(() -> System.out.println("Started app..."));
-        jt.addOnCloseCallback(() -> System.out.println("Closed the app!"));
+    jt.bind(c, t)
+    jt.addBeforeStartCallback { log.info("Started app...") }
+    jt.addOnCloseCallback { log.info("Closed the app!") }
 
-        jt.run();
-    }
+    jt.run()
 }

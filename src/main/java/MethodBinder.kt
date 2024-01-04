@@ -1,76 +1,67 @@
-import annotations.BindMethod;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import dev.webview.Webview;
+import annotations.BindMethod
+import com.google.gson.Gson
+import com.google.gson.JsonElement
+import com.google.gson.JsonParser
+import dev.webview.Webview
+import org.slf4j.LoggerFactory
+import java.lang.reflect.Method
+import java.util.function.Consumer
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.List;
+object MethodBinder {
+    private val gson = Gson()
+    private val log = LoggerFactory.getLogger(this::class.java)
 
-public final class MethodBinder {
-    private final static Gson gson = new Gson();
+    fun bind(wv: Webview, vararg objects: Any) {
+        for (o in objects) {
+            val handlers = createHandlers(o)
+            for (h in handlers) {
+                if (h == null) continue
 
-    public static void bind(Webview wv, Object ...objects) {
-        for (Object o : objects) {
-            List<Handler> handlers = MethodBinder.createHandlers(o);
-            for (Handler h : handlers) {
-                if (h == null) continue;
-                wv.bind(h.name, WebviewCallbackWrapper.wrap(h));
+                wv.bind(h.name, WebviewCallbackWrapper.wrap(h))
             }
         }
     }
 
-    private static List<Handler> createHandlers(Object object) {
-        List<Handler> handlers = new ArrayList<>();
-        for (Method method : object.getClass().getDeclaredMethods()) {
-            handlers.add(createHandler(object, method));
+    private fun createHandlers(obj: Any): List<Handler?> {
+        val handlers: MutableList<Handler?> = ArrayList()
+        for (method in obj.javaClass.declaredMethods) {
+            handlers.add(createHandler(obj, method))
         }
-        return handlers;
+        return handlers
     }
 
-    private static Handler createHandler(Object object, Method method) {
-        if (!method.isAnnotationPresent(BindMethod.class)) return null;
-
-        Handler handler = new Handler();
-        String className = object.getClass().getSimpleName();
-        String methodName = method.getName();
-        handler.name = className + "_" + methodName;
-        handler.callback = jsonArgs -> {
-            List<String> jsonElements = splitArrayToJsonElements(jsonArgs);
-            jsonElements.forEach(System.out::println);
-            Parameter[] params = method.getParameters();
-            List<Object> properParams = new ArrayList<>();
-            for (int i = 0; i < params.length; i++) {
-                String currentJsonElement = jsonElements.get(i);
-                Parameter currentParam = params[i];
-                properParams.add(gson.fromJson(currentJsonElement, currentParam.getType()));
+    private fun createHandler(obj: Any, method: Method): Handler? {
+        if (!method.isAnnotationPresent(BindMethod::class.java)) return null
+        val name = obj.javaClass.simpleName + "_" + method.name
+        return Handler(
+            name
+        ) { jsonArgs: String ->
+            val jsonElements = splitArrayToJsonElements(jsonArgs)
+            jsonElements.forEach(Consumer { x: String? -> println(x) })
+            val params = method.parameters
+            val properParams: MutableList<Any> = ArrayList()
+            var i = 0
+            while (i < params.size) {
+                val currentJsonElement = jsonElements[i]
+                val currentParam = params[i]
+                properParams.add(gson.fromJson(currentJsonElement, currentParam.type))
+                i++
             }
             try {
-                return  method.invoke(object, properParams.toArray());
-            } catch (Exception e) {
-                System.out.println("Failed to execute handler for " + handler.name);
-                System.out.println("Error: " + e.getMessage());
+                method.invoke(obj, *properParams.toTypedArray())
+            } catch (e: Exception) {
+                log.error("Failed to execute handler for $name", e)
+                null
             }
-            return null;
-        };
-
-        return handler;
-    }
-
-    private static List<String> splitArrayToJsonElements(String jsonString) {
-        List<String> listElements = new ArrayList<>();
-
-        JsonElement parsedElement = JsonParser.parseString(jsonString);
-        if (!parsedElement.isJsonArray()) {
-            System.out.println("Error: " + jsonString + " is not a json array.");
-            return listElements;
         }
-
-        JsonArray jsonArray = parsedElement.getAsJsonArray();
-        return jsonArray.asList().stream().map(JsonElement::toString).toList();
     }
 
+    private fun splitArrayToJsonElements(jsonString: String): List<String> {
+        val parsedElement = JsonParser.parseString(jsonString)
+        if (!parsedElement.isJsonArray) {
+            log.error("$jsonString is not a json array.")
+            return ArrayList()
+        }
+        return parsedElement.asJsonArray.map { it.toString() }
+    }
 }

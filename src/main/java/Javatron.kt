@@ -1,80 +1,63 @@
-import dev.webview.Webview;
+import CodeGenerator.generateFunctions
+import CodeGenerator.generateTypes
+import dev.webview.Webview
+import java.util.*
+import java.util.function.Consumer
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-public class Javatron {
-    private final Webview _webview;
-    private final List<Runnable> _beforeStartCallbacks;
-    private final List<Runnable> _onCloseCallbacks;
-    private final List<Object> _bindObjects;
+class Javatron (withDevTools: Boolean = true) {
+    private val _webview: Webview = Webview(withDevTools)
+    private val _beforeStartCallbacks: MutableList<Runnable> = ArrayList()
+    private val _onCloseCallbacks: MutableList<Runnable> = ArrayList()
+    private val _bindObjects: MutableList<Any> = ArrayList()
 
     // data url for loading HTML, until webview_java is updated to include setHTML().
     // data:text/html,<!DOCTYPE html><html>blah</html>
+    var url: String? = null
 
-    private String _url;
-
-    public Javatron() {
-        this(true);
+    init {
+        setSize(800, 600)
     }
 
-    public Javatron(boolean withDevTools) {
-        final int DEFAULT_HEIGHT = 600;
-        final int DEFAULT_WIDTH = 800;
-
-        _webview = new Webview(withDevTools);
-        _beforeStartCallbacks = new ArrayList<>();
-        _onCloseCallbacks = new ArrayList<>();
-        _bindObjects = new ArrayList<>();
-
-        setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    fun setTitle(title: String) {
+        _webview.setTitle(title)
     }
 
-    public void setTitle(String title) {
-        _webview.setTitle(title);
+    fun setSize(width: Int, height: Int) {
+        _webview.setSize(width, height)
     }
 
-    public void setSize(int width, int height) {
-        _webview.setSize(width, height);
+    fun setMinSize(minWidth: Int, minHeight: Int) {
+        _webview.setMinSize(minWidth, minHeight)
     }
 
-    public void setURL(String url) {
-        this._url = url;
+    fun setMaxSize(maxWidth: Int, maxHeight: Int) {
+        _webview.setMaxSize(maxWidth, maxHeight)
     }
 
-    public void setMinSize(int minWidth, int minHeight) {
-        _webview.setMinSize(minWidth, minHeight);
+    fun setFixedSize(fixedWidth: Int, fixedHeight: Int) {
+        _webview.setFixedSize(fixedWidth, fixedHeight)
     }
 
-    public void setMaxSize(int maxWidth, int maxHeight) {
-        _webview.setMaxSize(maxWidth, maxHeight);
+    fun bind(vararg objects: Any) {
+        _bindObjects.addAll(Arrays.stream(objects).toList())
     }
 
-    public void setFixedSize(int fixedWidth, int fixedHeight) {
-        _webview.setFixedSize(fixedWidth, fixedHeight);
+    fun addBeforeStartCallback(r: Runnable) {
+        _beforeStartCallbacks.add(r)
     }
 
-    public void bind(Object ...objects) {
-        _bindObjects.addAll(Arrays.stream(objects).toList());
+    fun addOnCloseCallback(r: Runnable) {
+        _onCloseCallbacks.add(r)
     }
 
-    public void addBeforeStartCallback(Runnable r) {
-        _beforeStartCallbacks.add(r);
-    }
+    fun run() {
+        generateTypes(*_bindObjects.toTypedArray())
+        generateFunctions(*_bindObjects.toTypedArray())
+        MethodBinder.bind(_webview, *_bindObjects.toTypedArray())
 
-    public void addOnCloseCallback(Runnable r) {
-        _onCloseCallbacks.add(r);
-    }
-
-    public void run() {
-        CodeGenerator.generateTypes(_bindObjects.toArray());
-        CodeGenerator.generateFunctions(_bindObjects.toArray());
-        MethodBinder.bind(_webview, _bindObjects.toArray());
-
-        _beforeStartCallbacks.forEach(Runnable::run);
-        _webview.loadURL(_url);
-        _webview.run();
-        _onCloseCallbacks.forEach(Runnable::run);
+        _beforeStartCallbacks.forEach(Consumer { it.run() })
+        _webview.loadURL(url)
+        _webview.run()
+        _onCloseCallbacks.forEach(Consumer { it.run() })
     }
 }

@@ -1,130 +1,105 @@
-import annotations.BindMethod;
+import annotations.BindMethod
+import org.slf4j.LoggerFactory
+import java.io.IOException
+import java.io.PrintWriter
+import java.util.*
+import kotlin.system.exitProcess
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.stream.Collectors;
+object CodeGenerator {
+    private const val CLIENT_FOLDER_PATH = "frontend/javatron/"
+    private const val METHODS_FOLDER_PATH = CLIENT_FOLDER_PATH + "methods/"
+    private const val EVENTS_FOLDER_PATH = CLIENT_FOLDER_PATH + "events/"
+    private const val TYPES_FILE_PATH = CLIENT_FOLDER_PATH + "types.ts"
 
-public final class CodeGenerator {
-    private final static String CLIENT_FOLDER_PATH = "frontend/javatron/";
-    private final static String METHODS_FOLDER_PATH = CLIENT_FOLDER_PATH + "methods/";
-    private final static String EVENTS_FOLDER_PATH = CLIENT_FOLDER_PATH + "events/";
-    private final static String TYPES_FILE_PATH = CLIENT_FOLDER_PATH + "types.ts";
+    private val log = LoggerFactory.getLogger(this::class.java)
 
-    static {
-        FileManager.createOrReplaceFile(TYPES_FILE_PATH);
-        FileManager.createOrReplaceDirectory(METHODS_FOLDER_PATH);
+    init {
+        FileManager.createOrReplaceFile(TYPES_FILE_PATH)
+        FileManager.createOrReplaceDirectory(METHODS_FOLDER_PATH)
     }
 
-    public static void generateTypes(Object... objects) {
+    fun generateTypes(vararg objects: Any) {
         try {
-            PrintWriter writer = new PrintWriter(TYPES_FILE_PATH);
-            Class<?>[] classes = TypeConverter.getClasses(objects);
-            Arrays.stream(classes).forEach(c -> TypeConverter.boundTypes.add(c.getSimpleName()));
-            for (Class<?> c : classes) {
+            val writer = PrintWriter(TYPES_FILE_PATH)
+            val classes = TypeConverter.getClasses(*objects)
+            TypeConverter.boundTypes.addAll(classes.map { it.simpleName })
+            for (c in classes) {
                 // Declare type and export
-                String typeName = c.getSimpleName();
-                writer.println("export type " + c.getSimpleName() + " = {");
+                writer.println("export type ${c.simpleName} = {")
 
                 // Add fields and map the types from java to typescript
-                Field[] fields = c.getDeclaredFields();
-                for (Field field : fields) {
-                    String name = field.getName();
-                    String type = TypeConverter.convert(field.getGenericType(), false);
-                    writer.println("\t" + name + ": " + type);
+                for (field in c.declaredFields) {
+                    val name = field.name
+                    val type = TypeConverter.convert(field.genericType, false)
+                    writer.println("\t$name: $type")
                 }
-                writer.println("}\n");
+                writer.println("}\n")
 
-                Log.INFO("Created type: %s", typeName);
+                log.info("Created type: ${c.simpleName}")
             }
-            writer.close();
-        } catch (IOException e) {
-            Log.SEVERE("Failed to generate a types file `types.ts`.");
-            e.printStackTrace();
-            System.exit(1);
+            writer.close()
+        } catch (e: IOException) {
+            log.error("Failed to generate a types file `types.ts`.", e)
+            exitProcess(1)
         }
     }
 
-    public static void generateFunctions(Object... objects) {
-        Class<?>[] classes = TypeConverter.getClasses(objects);
-        for (Class<?> c : classes) {
-            createJavascriptFunctions(c);
-            createTypescriptDeclarations(c);
+    fun generateFunctions(vararg objects: Any) {
+        for (c in TypeConverter.getClasses(*objects)) {
+            createJavascriptFunctions(c)
+            createTypescriptDeclarations(c)
         }
     }
 
-    private static void createJavascriptFunctions(Class<?> c) {
+    private fun createJavascriptFunctions(c: Class<*>) {
         try {
-            String className = c.getSimpleName();
-            String path = METHODS_FOLDER_PATH + className + ".js";
-            FileManager.createOrReplaceFile(path);
-            PrintWriter writer = new PrintWriter(path);
+            val className = c.simpleName
+            val path = "$METHODS_FOLDER_PATH$className.js"
+            FileManager.createOrReplaceFile(path)
+            val writer = PrintWriter(path)
 
-            for (Method method : c.getDeclaredMethods()) {
-                if (!method.isAnnotationPresent(BindMethod.class)) continue;
+            for (method in c.declaredMethods) {
+                if (!method.isAnnotationPresent(BindMethod::class.java)) continue
 
-                String methodName = method.getName();
-                Parameter[] params = method.getParameters();
-                String argsString = Arrays.stream(params).map(Parameter::getName).collect(Collectors.joining(","));
-                writer.println("export function " + methodName + "(" + argsString + ") {");
-                writer.println("\treturn window[\"" + className + "_" + methodName + "\"](" + argsString + ");");
-                writer.println("}\n");
+                val methodName = method.name
+                val argsString = method.parameters.joinToString(",") { it.name }
+                writer.println("export function $methodName($argsString) {")
+                writer.println("\treturn window[\"${className}_$methodName\"]($argsString);")
+                writer.println("}\n")
             }
 
-            writer.close();
-        } catch (IOException e) {
-            Log.SEVERE("Failed to create javascript function for class %s.", c.getSimpleName());
-            e.printStackTrace();
-            System.exit(1);
+            writer.close()
+        } catch (e: IOException) {
+            log.error("Failed to create javascript function for class ${c.simpleName}.", e)
+            exitProcess(1)
         }
     }
 
-    private static String toJSType(Class<?> c) {
-        String type = TypeConverter.jsTypes.get(c.getSimpleName());
-        if (type != null) return type;
+    private fun toJSType(c: Class<*>) =
+        TypeConverter.jsTypes[c.simpleName] ?: ("jt." + c.simpleName)
 
-        return "jt." + c.getSimpleName();
-    }
-
-    private static void createTypescriptDeclarations(Class<?> c) {
+    private fun createTypescriptDeclarations(c: Class<*>) {
         try {
-            String className = c.getSimpleName();
-            String path = METHODS_FOLDER_PATH + className + ".d.ts";
-            FileManager.createOrReplaceFile(path);
-            PrintWriter writer = new PrintWriter(path);
+            val path = "$METHODS_FOLDER_PATH${c.simpleName}.d.ts"
+            FileManager.createOrReplaceFile(path)
+            val writer = PrintWriter(path)
 
-            writer.println("import * as jt from '../types';\n");
+            writer.println("import * as jt from '../types';\n")
 
-            for (Method method : Arrays.stream(c.getDeclaredMethods()).sorted(Comparator.comparing(Method::getName)).toList()) {
-                if (!method.isAnnotationPresent(BindMethod.class)) continue;
-                Log.INFO("Created function %s of class %s", method.getName(), c.getSimpleName());
-                String methodName = method.getName();
-                Parameter[] params = method.getParameters();
-                String argsString = Arrays.stream(params)
-                        .map(p -> {
-                            String name = p.getName();
-                            String type = toJSType(p.getType());
-                            return name + ": " + type;
-                        })
-                        .collect(Collectors.joining(","));
-
-                String convertedReturnType = TypeConverter.convert(method.getReturnType(), true);
-                String returnTypeString = "Promise<" + convertedReturnType + ">";
-                if (convertedReturnType.equals("void"))
-                    returnTypeString = "";
-
-                writer.println("export function " + methodName + "(" + argsString + ")" + returnTypeString + ";\n");
+            for (method in c.declaredMethods.sortedBy { it.name }) {
+                if (!method.isAnnotationPresent(BindMethod::class.java)) continue
+                log.info("Created function ${method.name} of class ${c.simpleName}")
+                val argsString = method.parameters.joinToString(",") { "${it.name}: ${toJSType(it.type)}" }
+                val convertedReturnType = TypeConverter.convert(method.returnType, true)
+                var returnTypeString = ": Promise<$convertedReturnType>"
+                if (convertedReturnType == "void") returnTypeString = ""
+                writer.println("export function ${method.name}($argsString)$returnTypeString;\n")
             }
 
-            writer.close();
-        } catch (IOException e) {
-            Log.SEVERE("Failed to create typescript declarations for class %s.", c.getSimpleName());
-            e.printStackTrace();
-            System.exit(1);
+            writer.close()
+        } catch (e: IOException) {
+            log.error("Failed to create typescript declarations for class ${c.simpleName}.", e)
+            exitProcess(1)
         }
     }
 }

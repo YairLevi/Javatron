@@ -1,6 +1,1 @@
-import java.util.function.Function;
-
-public class Handler {
-    public String name;
-    public Function<String, Object> callback;
-}
+data class Handler(var name: String, var callback: (String) -> Any?)
