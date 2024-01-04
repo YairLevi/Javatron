@@ -1,0 +1,1 @@
+data class Handler(var name: String, var callback: (String) -> Any?)
