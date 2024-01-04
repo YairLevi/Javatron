@@ -27,7 +27,7 @@ public final class FileManager {
      * Creates a new file at `path`, and overrides existing files.
      * @param path
      */
-    public static void createNewFile(String path) {
+    public static void createOrReplaceFile(String path) {
         try {
             File file = new File(path);
             File parentDir = file.getParentFile();

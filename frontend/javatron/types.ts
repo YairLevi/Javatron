@@ -1,7 +1,6 @@
 export type Custom = {
 	age: number
 	name: string
-	jt: any
 }
 
 export type TestClass = {

@@ -15,7 +15,7 @@ public final class CodeGenerator {
     private final static String TYPES_FILE_PATH = CLIENT_FOLDER_PATH + "types.ts";
 
     static {
-        FileManager.createNewFile(TYPES_FILE_PATH);
+        FileManager.createOrReplaceFile(TYPES_FILE_PATH);
         FileManager.createOrReplaceDirectory(METHODS_FOLDER_PATH);
     }
 
@@ -70,7 +70,7 @@ public final class CodeGenerator {
         try {
             String className = c.getSimpleName();
             String path = METHODS_FOLDER_PATH + className + ".js";
-            FileManager.createNewFile(path);
+            FileManager.createOrReplaceFile(path);
             writer = new FileWriter(path);
 
             for (Method method : c.getDeclaredMethods()) {
@@ -110,7 +110,7 @@ public final class CodeGenerator {
         try {
             String className = c.getSimpleName();
             String path = METHODS_FOLDER_PATH + className + ".d.ts";
-            FileManager.createNewFile(path);
+            FileManager.createOrReplaceFile(path);
             writer = new FileWriter(path);
 
             writer.write("import * as jt from '../types';\n\n");

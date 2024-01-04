@@ -10,6 +10,11 @@ public class Javatron {
     private final List<Runnable> _onCloseCallbacks;
     private final List<Object> _bindObjects;
 
+    // data url for loading HTML, until webview_java is updated to include setHTML().
+    // data:text/html,<!DOCTYPE html><html>blah</html>
+
+    private String _url;
+
     public Javatron() {
         this(true);
     }
@@ -35,7 +40,7 @@ public class Javatron {
     }
 
     public void setURL(String url) {
-        _webview.loadURL(url);
+        this._url = url;
     }
 
     public void setMinSize(int minWidth, int minHeight) {
@@ -54,14 +59,8 @@ public class Javatron {
         _bindObjects.addAll(Arrays.stream(objects).toList());
     }
 
-    public Webview getWV() {
-        return _webview;
-    }
-
     public void invoke(String event) {
-        // test eval
-        _webview.eval("window.ipc['test_invoke'].handler()");
-        _webview.eval("console.log(123)");
+        _webview.eval("window.ipc['"+event+"'].handler()");
     }
 
     public void addBeforeStartCallback(Runnable r) {
@@ -78,6 +77,7 @@ public class Javatron {
         MethodBinder.bind(_webview, _bindObjects.toArray());
 
         _beforeStartCallbacks.forEach(Runnable::run);
+        _webview.loadURL(_url);
         _webview.run();
         _onCloseCallbacks.forEach(Runnable::run);
     }

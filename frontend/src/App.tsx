@@ -1,7 +1,7 @@
 import './App.css'
 import {useEffect, useState} from "react";
 import {addTwoNumbers, incrementAndPrint, joinStrings} from "../javatron/methods/TestClass"
-import { addListener } from "../@coffee/client/events";
+import { addListener } from "../javatron/ipc/events";
 import { invoke } from "../javatron/methods/Custom";
 
 function App() {
@@ -17,6 +17,7 @@ function App() {
       <button onClick={incrementAndPrint}>click list</button>
       <button onClick={() => window["echo"]()}>test_eval</button>
       <button onClick={invoke}>Click to test invoke</button>
+      <p>aragamana is aogeoahmoemh</p>
     </>
   )
 }

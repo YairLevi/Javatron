@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface BindType {
-    // String[] exclude() default {}; // TODO: optionally, ignore some fields.
+    String[] exclude() default {}; // TODO: optionally, ignore some fields.
 }

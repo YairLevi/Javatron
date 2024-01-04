@@ -37,11 +37,9 @@ public interface TypeConverter {
     );
 
     static Class<?>[] getClasses(Object ...objects) {
-        Class<?>[] classes = new Class[objects.length];
-        for (int i = 0;  i < classes.length; i++) {
-            classes[i] = objects[i].getClass();
-        }
-        return classes;
+        return Arrays.stream(objects)
+                .map(Object::getClass)
+                .toArray(Class[]::new);
     }
 
     static String extractTypeName(String fullTypeName) {
