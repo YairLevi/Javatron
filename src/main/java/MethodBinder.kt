@@ -31,7 +31,6 @@ object MethodBinder {
             name
         ) { jsonArgs: String ->
             val jsonElements = splitArrayToJsonElements(jsonArgs)
-            jsonElements.forEach(Consumer { x: String? -> println(x) })
             val params = method.parameters
             val properParams: MutableList<Any> = ArrayList()
             var i = 0
