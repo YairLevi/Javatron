@@ -65,5 +65,6 @@ class Javatron (withDevTools: Boolean = true) {
         _webview.loadURL(_url)
         _webview.run()
         _onCloseCallbacks.forEach(Consumer { it.run() })
+        _webview.close()
     }
 }
