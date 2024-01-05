@@ -1,6 +1,5 @@
 import annotations.BindMethod
 import com.google.gson.Gson
-import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import dev.webview.Webview
 import org.slf4j.LoggerFactory
@@ -12,26 +11,21 @@ object MethodBinder {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     fun bind(wv: Webview, vararg objects: Any) {
-        for (o in objects) {
-            val handlers = createHandlers(o)
+        for (obj in objects) {
+            val handlers = createHandlers(obj)
             for (h in handlers) {
-                if (h == null) continue
-
                 wv.bind(h.name, WebviewCallbackWrapper.wrap(h))
             }
         }
     }
 
-    private fun createHandlers(obj: Any): List<Handler?> {
-        val handlers: MutableList<Handler?> = ArrayList()
-        for (method in obj.javaClass.declaredMethods) {
-            handlers.add(createHandler(obj, method))
-        }
-        return handlers
+    private fun createHandlers(obj: Any): List<Handler> {
+        return obj::class.java.declaredMethods
+            .filter { it.isAnnotationPresent(BindMethod::class.java) }
+            .map { createHandler(obj, it) }
     }
 
-    private fun createHandler(obj: Any, method: Method): Handler? {
-        if (!method.isAnnotationPresent(BindMethod::class.java)) return null
+    private fun createHandler(obj: Any, method: Method): Handler {
         val name = obj.javaClass.simpleName + "_" + method.name
         return Handler(
             name
