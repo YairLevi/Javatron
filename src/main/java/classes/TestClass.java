@@ -1,5 +1,8 @@
+package classes;
+
 import annotations.BindMethod;
 import annotations.BindType;
+import classes.Custom;
 
 import java.util.ArrayList;
 import java.util.List;
