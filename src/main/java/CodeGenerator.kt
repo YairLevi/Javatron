@@ -13,8 +13,8 @@ object CodeGenerator {
     private const val EVENTS_API_FILE_RESOURCE = "events.ts"
     private const val WINDOW_DECLARE_FILE_RESOURCE = "window.d.ts"
 
-    private const val EVENTS_API_FILE_DEST = CLIENT_FOLDER_PATH + "events/events.ts"
-    private const val WINDOW_DECLARE_FILE_DEST = CLIENT_FOLDER_PATH + "events/window.d.ts"
+    private const val EVENTS_API_FILE_DEST = CLIENT_FOLDER_PATH + "events.ts"
+    private const val WINDOW_DECLARE_FILE_DEST = CLIENT_FOLDER_PATH + "window.d.ts"
 
     private val log = LoggerFactory.getLogger(this::class.java)
 

@@ -12,15 +12,16 @@ class Javatron (withDevTools: Boolean = true) {
     private val _bindObjects: MutableList<Any> = ArrayList()
     private var _url: String = ""
 
-    // data url for loading HTML, until webview_java is updated to include setHTML().
-    // data:text/html,<!DOCTYPE html><html>blah</html>
-
     init {
         setSize(800, 600)
     }
 
     fun setURL(url: String) {
         _url = url
+    }
+
+    fun setHTML(html: String) {
+        _url = "data:text/html,$html"
     }
 
     fun setTitle(title: String) {
