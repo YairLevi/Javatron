@@ -63,6 +63,7 @@ class Javatron (withDevTools: Boolean = true) {
         MethodBinder.bind(_webview, *_bindObjects.toTypedArray())
 
         _beforeStartCallbacks.forEach(Consumer { it.run() })
+        Ipc.setWebview(_webview)
         _webview.loadURL(_url)
         _webview.run()
         _onCloseCallbacks.forEach(Consumer { it.run() })
