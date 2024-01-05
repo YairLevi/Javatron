@@ -23,10 +23,34 @@ object CodeGenerator {
         FileManager.createOrReplaceDirectory(METHODS_FOLDER_PATH)
     }
 
+    fun generateEventsAPI() {
+        try {
+            FileManager.createOrReplaceFile(EVENTS_API_FILE_DEST)
+            FileManager.createOrReplaceFile(WINDOW_DECLARE_FILE_DEST)
+
+            val eventsFileURL = object {}.javaClass.classLoader.getResource(EVENTS_API_FILE_RESOURCE)
+            val windowFileURL = object {}.javaClass.classLoader.getResource(WINDOW_DECLARE_FILE_RESOURCE)
+
+            if (eventsFileURL != null && windowFileURL != null) {
+                val eventsFileContents = File(eventsFileURL.toURI()).readText()
+                val windowFileContents = File(windowFileURL.toURI()).readText()
+
+                File(EVENTS_API_FILE_DEST).printWriter().use { out -> out.println(eventsFileContents) }
+                File(WINDOW_DECLARE_FILE_DEST).printWriter().use { out -> out.println(windowFileContents) }
+            } else {
+                throw Exception("Failed to find files in resources.")
+            }
+        } catch (e: Exception) {
+            log.error("Error reading the file: ${e.message}")
+            exitProcess(1)
+        }
+        log.info("Created events API files.")
+    }
+
     fun generateTypes(vararg objects: Any) {
         try {
             val writer = PrintWriter(TYPES_FILE_PATH)
-            val classes = TypeConverter.getClasses(*objects)
+            val classes = objects.map { it.javaClass }
             TypeConverter.boundTypes.addAll(classes.map { it.simpleName })
             for (c in classes) {
                 // Declare type and export
@@ -50,7 +74,7 @@ object CodeGenerator {
     }
 
     fun generateFunctions(vararg objects: Any) {
-        for (c in TypeConverter.getClasses(*objects)) {
+        for (c in objects.map { it.javaClass }) {
             createJavascriptFunctions(c)
             createTypescriptDeclarations(c)
         }
@@ -80,25 +104,29 @@ object CodeGenerator {
         }
     }
 
-    private fun toJSType(c: Class<*>) =
-            TypeConverter.jsTypes[c.simpleName] ?: ("jt." + c.simpleName)
-
     private fun createTypescriptDeclarations(c: Class<*>) {
         try {
             val path = "$METHODS_FOLDER_PATH${c.simpleName}.d.ts"
             FileManager.createOrReplaceFile(path)
             val writer = PrintWriter(path)
 
-            writer.println("import * as jt from '../types';\n")
+            writer.println("import * as t from '../types';\n")
 
             for (method in c.declaredMethods.sortedBy { it.name }) {
-                if (!method.isAnnotationPresent(BindMethod::class.java)) continue
-                log.info("Created function ${method.name} of class ${c.simpleName}")
-                val argsString = method.parameters.joinToString(",") { "${it.name}: ${toJSType(it.type)}" }
-                val convertedReturnType = TypeConverter.convert(method.returnType, true)
+                if (!method.isAnnotationPresent(BindMethod::class.java)) {
+                    continue
+                }
+
+                val argsString = method.parameters.joinToString(", ") {
+                    "${it.name}: ${TypeConverter.convert(it.parameterizedType, true)}"
+                }
+                val convertedReturnType = TypeConverter.convert(method.genericReturnType, true)
                 var returnTypeString = ": Promise<$convertedReturnType>"
                 if (convertedReturnType == "void") returnTypeString = ""
+
                 writer.println("export function ${method.name}($argsString)$returnTypeString;\n")
+
+                log.info("Created function ${method.name} of class ${c.simpleName}")
             }
 
             writer.close()
@@ -106,29 +134,5 @@ object CodeGenerator {
             log.error("Failed to create typescript declarations for class ${c.simpleName}.", e)
             exitProcess(1)
         }
-    }
-
-    fun generateEventsAPI() {
-        try {
-            FileManager.createOrReplaceFile(EVENTS_API_FILE_DEST)
-            FileManager.createOrReplaceFile(WINDOW_DECLARE_FILE_DEST)
-
-            val eventsFileURL = object {}.javaClass.classLoader.getResource(EVENTS_API_FILE_RESOURCE)
-            val windowFileURL = object {}.javaClass.classLoader.getResource(WINDOW_DECLARE_FILE_RESOURCE)
-
-            if (eventsFileURL != null && windowFileURL != null) {
-                val eventsFileContents = File(eventsFileURL.toURI()).readText()
-                val windowFileContents = File(windowFileURL.toURI()).readText()
-
-                File(EVENTS_API_FILE_DEST).printWriter().use { out -> out.println(eventsFileContents) }
-                File(WINDOW_DECLARE_FILE_DEST).printWriter().use { out -> out.println(windowFileContents) }
-            } else {
-                throw Exception("Failed to find files in resources.")
-            }
-        } catch (e: Exception) {
-            log.error("Error reading the file: ${e.message}")
-            exitProcess(1)
-        }
-        log.info("Created events API files.")
     }
 }

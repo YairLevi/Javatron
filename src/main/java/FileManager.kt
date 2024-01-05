@@ -1,11 +1,11 @@
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Path
+import kotlin.system.exitProcess
+
 
 object FileManager {
-    val log = LoggerFactory.getLogger(this::class.java)
+    private val log = LoggerFactory.getLogger(this::class.java)
 
     fun createOrReplaceDirectory(pathString: String) {
         if (
@@ -13,13 +13,12 @@ object FileManager {
                 deleteRecursively()
                 mkdirs()
             }
-        ) log.error("Error occurred while creating or replacing directory")
+        ) {
+            log.error("Error occurred while creating or replacing directory")
+            exitProcess(1)
+        }
     }
 
-    /**
-     * Creates a new file at `path`, and overrides existing files.
-     * @param path
-     */
     fun createOrReplaceFile(path: String) {
         try {
             with(File(path)) {
@@ -33,6 +32,7 @@ object FileManager {
             }
         } catch (e: IOException) {
             log.error("Error creating a types file for the frontend.", e)
+            exitProcess(1)
         }
     }
 }

@@ -1,16 +1,14 @@
+import classes.Person
 import org.slf4j.LoggerFactory
 
 val log = LoggerFactory.getLogger("Main")
-fun main(args: Array<String>) {
+
+fun main() {
     val jt = Javatron()
     jt.setSize(700, 700)
     jt.setTitle("My first Javatron app!")
     jt.setURL("http://localhost:5173")
-
-    val t = TestClass()
-    val c = Custom()
-
-    jt.bind(c, t)
+    jt.bind(Person())
     jt.addBeforeStartCallback { log.info("Started app...") }
     jt.addOnCloseCallback { log.info("Closed the app!") }
 
