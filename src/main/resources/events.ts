@@ -1,4 +1,6 @@
-import "./window.txt"
+import "./window"
+
+window.ipc = {}
 
 export function addListener(event: string, callback: () => void) {
   if (window.ipc[event]) {

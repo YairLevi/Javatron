@@ -1,3 +1,4 @@
+import CodeGenerator.generateEventsAPI
 import CodeGenerator.generateFunctions
 import CodeGenerator.generateTypes
 import dev.webview.Webview
@@ -9,13 +10,17 @@ class Javatron (withDevTools: Boolean = true) {
     private val _beforeStartCallbacks: MutableList<Runnable> = ArrayList()
     private val _onCloseCallbacks: MutableList<Runnable> = ArrayList()
     private val _bindObjects: MutableList<Any> = ArrayList()
+    private var _url: String = ""
 
     // data url for loading HTML, until webview_java is updated to include setHTML().
     // data:text/html,<!DOCTYPE html><html>blah</html>
-    var url: String? = null
 
     init {
         setSize(800, 600)
+    }
+
+    fun setURL(url: String) {
+        _url = url
     }
 
     fun setTitle(title: String) {
@@ -51,12 +56,13 @@ class Javatron (withDevTools: Boolean = true) {
     }
 
     fun run() {
+        generateEventsAPI()
         generateTypes(*_bindObjects.toTypedArray())
         generateFunctions(*_bindObjects.toTypedArray())
         MethodBinder.bind(_webview, *_bindObjects.toTypedArray())
 
         _beforeStartCallbacks.forEach(Consumer { it.run() })
-        _webview.loadURL(url)
+        _webview.loadURL(_url)
         _webview.run()
         _onCloseCallbacks.forEach(Consumer { it.run() })
     }

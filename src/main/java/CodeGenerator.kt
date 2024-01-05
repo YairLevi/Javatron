@@ -1,15 +1,20 @@
 import annotations.BindMethod
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
-import java.util.*
 import kotlin.system.exitProcess
 
 object CodeGenerator {
     private const val CLIENT_FOLDER_PATH = "frontend/javatron/"
     private const val METHODS_FOLDER_PATH = CLIENT_FOLDER_PATH + "methods/"
-    private const val EVENTS_FOLDER_PATH = CLIENT_FOLDER_PATH + "events/"
     private const val TYPES_FILE_PATH = CLIENT_FOLDER_PATH + "types.ts"
+
+    private const val EVENTS_API_FILE_RESOURCE = "events.ts"
+    private const val WINDOW_DECLARE_FILE_RESOURCE = "window.d.ts"
+
+    private const val EVENTS_API_FILE_DEST = CLIENT_FOLDER_PATH + "events/events.ts"
+    private const val WINDOW_DECLARE_FILE_DEST = CLIENT_FOLDER_PATH + "events/window.d.ts"
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -76,7 +81,7 @@ object CodeGenerator {
     }
 
     private fun toJSType(c: Class<*>) =
-        TypeConverter.jsTypes[c.simpleName] ?: ("jt." + c.simpleName)
+            TypeConverter.jsTypes[c.simpleName] ?: ("jt." + c.simpleName)
 
     private fun createTypescriptDeclarations(c: Class<*>) {
         try {
@@ -101,5 +106,29 @@ object CodeGenerator {
             log.error("Failed to create typescript declarations for class ${c.simpleName}.", e)
             exitProcess(1)
         }
+    }
+
+    fun generateEventsAPI() {
+        try {
+            FileManager.createOrReplaceFile(EVENTS_API_FILE_DEST)
+            FileManager.createOrReplaceFile(WINDOW_DECLARE_FILE_DEST)
+
+            val eventsFileURL = object {}.javaClass.classLoader.getResource(EVENTS_API_FILE_RESOURCE)
+            val windowFileURL = object {}.javaClass.classLoader.getResource(WINDOW_DECLARE_FILE_RESOURCE)
+
+            if (eventsFileURL != null && windowFileURL != null) {
+                val eventsFileContents = File(eventsFileURL.toURI()).readText()
+                val windowFileContents = File(windowFileURL.toURI()).readText()
+
+                File(EVENTS_API_FILE_DEST).printWriter().use { out -> out.println(eventsFileContents) }
+                File(WINDOW_DECLARE_FILE_DEST).printWriter().use { out -> out.println(windowFileContents) }
+            } else {
+                throw Exception("Failed to find files in resources.")
+            }
+        } catch (e: Exception) {
+            log.error("Error reading the file: ${e.message}")
+            exitProcess(1)
+        }
+        log.info("Created events API files.")
     }
 }
