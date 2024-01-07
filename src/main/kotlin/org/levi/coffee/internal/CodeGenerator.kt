@@ -12,11 +12,11 @@ internal object CodeGenerator {
     private const val METHODS_FOLDER_PATH = CLIENT_FOLDER_PATH + "methods/"
     private const val TYPES_FILE_PATH = CLIENT_FOLDER_PATH + "types.ts"
 
-    private const val EVENTS_API_FILE_RESOURCE = "events.ts"
-    private const val WINDOW_DECLARE_FILE_RESOURCE = "window.d.ts"
+    private const val EVENTS_API_FILE_RESOURCE = "/events.ts"
+    private const val WINDOW_DECLARE_FILE_RESOURCE = "/window.ts"
 
     private const val EVENTS_API_FILE_DEST = CLIENT_FOLDER_PATH + "events.ts"
-    private const val WINDOW_DECLARE_FILE_DEST = CLIENT_FOLDER_PATH + "window.d.ts"
+    private const val WINDOW_DECLARE_FILE_DEST = CLIENT_FOLDER_PATH + "window.ts"
 
     private val log = LoggerFactory.getLogger(this::class.java.simpleName)
 
@@ -31,20 +31,16 @@ internal object CodeGenerator {
             FileManager.createOrReplaceFile(EVENTS_API_FILE_DEST)
             FileManager.createOrReplaceFile(WINDOW_DECLARE_FILE_DEST)
 
-            val eventsFileURL = object {}.javaClass.classLoader.getResource(EVENTS_API_FILE_RESOURCE)
-            val windowFileURL = object {}.javaClass.classLoader.getResource(WINDOW_DECLARE_FILE_RESOURCE)
-
-            if (eventsFileURL != null && windowFileURL != null) {
-                val eventsFileContents = File(eventsFileURL.toURI()).readText()
-                val windowFileContents = File(windowFileURL.toURI()).readText()
-
-                File(EVENTS_API_FILE_DEST).printWriter().use { out -> out.println(eventsFileContents) }
-                File(WINDOW_DECLARE_FILE_DEST).printWriter().use { out -> out.println(windowFileContents) }
-            } else {
+            val eventsResource = this::class.java.getResource(EVENTS_API_FILE_RESOURCE)
+            val windowResource = this::class.java.getResource(WINDOW_DECLARE_FILE_RESOURCE)
+            if (eventsResource == null || windowResource == null) {
                 throw Exception("Failed to find files in resources.")
             }
+
+            File(EVENTS_API_FILE_DEST).printWriter().use { out -> out.println(eventsResource.readText()) }
+            File(WINDOW_DECLARE_FILE_DEST).printWriter().use { out -> out.println(windowResource.readText()) }
         } catch (e: Exception) {
-            log.error("Error reading the file: ${e.message}")
+            log.error("Error reading events files.", e)
             exitProcess(1)
         }
         log.info("Created events API files.")
