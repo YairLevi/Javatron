@@ -1,10 +1,12 @@
+package com.example.pkg
+
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 import kotlin.system.exitProcess
 
 
-object FileManager {
+internal object FileManager {
     private val log = LoggerFactory.getLogger(this::class.java)
 
     fun createOrReplaceDirectory(pathString: String) {

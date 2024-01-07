@@ -1,10 +1,11 @@
+package com.example.pkg
+
 import org.slf4j.LoggerFactory
-import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.util.*
 import java.util.regex.Pattern
 
-object TypeConverter {
+internal object TypeConverter {
     val boundTypes: MutableSet<String> = HashSet()
 
     private val log = LoggerFactory.getLogger(this::class.java)

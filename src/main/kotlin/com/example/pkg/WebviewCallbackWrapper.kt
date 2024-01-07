@@ -1,20 +1,21 @@
+package com.example.pkg
+
 import co.casterlabs.rakurai.json.Rson
 import co.casterlabs.rakurai.json.element.JsonArray
-import co.casterlabs.rakurai.json.element.JsonElement
 import dev.webview.ConsumingProducer
 import org.slf4j.LoggerFactory
 
 /**
  * Represents a handler that is called from the frontend.
  */
-data class Handler(var name: String, var callback: (String) -> Any?)
+internal data class Handler(var name: String, var callback: (String) -> Any?)
 
 /**
  * The current implementation of the `webview` package requires that methods passed to
  * `webview.bind()` receive a JsonArray and return JsonElement of the casterlabs package.
  * So this is a wrapper to make things more intuitive.
  */
-object WebviewCallbackWrapper {
+internal object WebviewCallbackWrapper {
     private val r: Rson = Rson.Builder().build()
     private val log = LoggerFactory.getLogger(this::class.java)
 

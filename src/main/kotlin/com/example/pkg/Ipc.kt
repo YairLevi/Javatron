@@ -1,3 +1,5 @@
+package com.example.pkg
+
 import org.slf4j.LoggerFactory
 import com.google.gson.Gson
 import dev.webview.Webview
@@ -7,7 +9,7 @@ object Ipc {
     private val gson = Gson()
     private lateinit var webview: Webview
     fun setWebview(webview: Webview) {
-        this.webview = webview
+        Ipc.webview = webview
     }
     fun invoke(event: String, vararg args: Any?) {
         try {

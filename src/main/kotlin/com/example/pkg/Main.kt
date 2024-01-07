@@ -1,9 +1,11 @@
-import classes.Person
+package com.example.pkg
+
+import com.example.pkg.classes.Person
 import org.slf4j.LoggerFactory
 
 val log = LoggerFactory.getLogger("Main")
 
-fun main() {
+internal fun main() {
     val jt = Javatron()
     jt.setSize(700, 700)
     jt.setTitle("My first Javatron app!")

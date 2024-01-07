@@ -1,6 +1,8 @@
-import CodeGenerator.generateEventsAPI
-import CodeGenerator.generateFunctions
-import CodeGenerator.generateTypes
+package com.example.pkg
+
+import com.example.pkg.CodeGenerator.generateEventsAPI
+import com.example.pkg.CodeGenerator.generateFunctions
+import com.example.pkg.CodeGenerator.generateTypes
 import dev.webview.Webview
 import java.util.*
 import java.util.function.Consumer

@@ -1,12 +1,13 @@
-import annotations.BindMethod
+package com.example.pkg
+
+import com.example.pkg.annotations.BindMethod
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import dev.webview.Webview
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Method
-import java.util.function.Consumer
 
-object MethodBinder {
+internal object MethodBinder {
     private val gson = Gson()
     private val log = LoggerFactory.getLogger(this::class.java)
 

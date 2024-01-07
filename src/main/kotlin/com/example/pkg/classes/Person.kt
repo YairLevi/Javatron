@@ -1,8 +1,8 @@
-package classes
+package com.example.pkg.classes
 
-import Ipc
-import annotations.BindMethod
-import annotations.BindType
+import com.example.pkg.Ipc
+import com.example.pkg.annotations.BindMethod
+import com.example.pkg.annotations.BindType
 
 @BindType
 class Person(
