@@ -40,4 +40,4 @@ build/
 .DS_Store
 
 ## FRONT END STUFF ##
-./frontend/node_modules/
+src/test/frontend/node_modules/
