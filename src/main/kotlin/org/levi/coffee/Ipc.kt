@@ -1,13 +1,15 @@
+package org.levi.coffee
+
 import org.slf4j.LoggerFactory
 import com.google.gson.Gson
 import dev.webview.Webview
 
 object Ipc {
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = LoggerFactory.getLogger(this::class.java.simpleName)
     private val gson = Gson()
     private lateinit var webview: Webview
-    fun setWebview(webview: Webview) {
-        this.webview = webview
+    internal fun setWebview(webview: Webview) {
+        Ipc.webview = webview
     }
     fun invoke(event: String, vararg args: Any?) {
         try {

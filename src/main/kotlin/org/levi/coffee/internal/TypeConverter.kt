@@ -1,13 +1,14 @@
+package org.levi.coffee.internal
+
 import org.slf4j.LoggerFactory
-import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.util.*
 import java.util.regex.Pattern
 
-object TypeConverter {
+internal object TypeConverter {
     val boundTypes: MutableSet<String> = HashSet()
 
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = LoggerFactory.getLogger(this::class.java.simpleName)
 
     private val jsTypes: Map<String, String> = mapOf(
         // primitives
@@ -46,11 +47,11 @@ object TypeConverter {
      */
     fun convert(t: Type, addTypePrefix: Boolean): String {
         var type = t.typeName
-            // Remove java packages prefix
+            // Remove packages prefix
             .replace("\\b[a-z]+\\.".toRegex(), "")
             // Remove some kotlin extension stuff, if there is any
             .replace("\\? extends ".toRegex(), "")
-            // Remove part of classes that are a specific implementation of a generic class (List, etc.)
+            // Remove part of classes that are a specific implementation of a generic class (e.g. 'Hash' in 'HashSet')
             .replace("Tree|Hash|Linked|Array".toRegex(), "")
 
         val pattern = Pattern.compile("[a-zA-Z0-9]+")
@@ -60,7 +61,8 @@ object TypeConverter {
         while (matcher.find()) {
             val javaType = matcher.group()
             if (!jsTypes.containsKey(javaType) && !boundTypes.contains(javaType)) {
-                log.error("java type $javaType is not recognized. Did you forget to @BindType ?\n" +
+                log.error("convert type $type:")
+                log.error("data type $javaType is not recognized. Did you forget to @BindType ?\n" +
                     "Used 'any' instead, just in case.")
                 type = type.replace(javaType, jsTypes.getOrDefault(javaType, "any"))
             } else if (!jsTypes.containsKey(javaType) && addTypePrefix) {

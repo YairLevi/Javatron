@@ -1,11 +1,13 @@
+package org.levi.coffee.internal
+
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 import kotlin.system.exitProcess
 
 
-object FileManager {
-    private val log = LoggerFactory.getLogger(this::class.java)
+internal object FileManager {
+    private val log = LoggerFactory.getLogger(this::class.java.simpleName)
 
     fun createOrReplaceDirectory(pathString: String) {
         if (

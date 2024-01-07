@@ -1,11 +1,14 @@
-import CodeGenerator.generateEventsAPI
-import CodeGenerator.generateFunctions
-import CodeGenerator.generateTypes
+package org.levi.coffee
+
+import org.levi.coffee.internal.CodeGenerator.generateEventsAPI
+import org.levi.coffee.internal.CodeGenerator.generateFunctions
+import org.levi.coffee.internal.CodeGenerator.generateTypes
 import dev.webview.Webview
+import org.levi.coffee.internal.MethodBinder
 import java.util.*
 import java.util.function.Consumer
 
-class Javatron (withDevTools: Boolean = true) {
+class Window (withDevTools: Boolean = true) {
     private val _webview: Webview = Webview(withDevTools)
     private val _beforeStartCallbacks: MutableList<Runnable> = ArrayList()
     private val _onCloseCallbacks: MutableList<Runnable> = ArrayList()

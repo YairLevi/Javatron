@@ -1,11 +1,13 @@
-import annotations.BindMethod
+package org.levi.coffee.internal
+
+import org.levi.coffee.annotations.BindMethod
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
 import kotlin.system.exitProcess
 
-object CodeGenerator {
+internal object CodeGenerator {
     private const val CLIENT_FOLDER_PATH = "frontend/javatron/"
     private const val METHODS_FOLDER_PATH = CLIENT_FOLDER_PATH + "methods/"
     private const val TYPES_FILE_PATH = CLIENT_FOLDER_PATH + "types.ts"
@@ -16,7 +18,7 @@ object CodeGenerator {
     private const val EVENTS_API_FILE_DEST = CLIENT_FOLDER_PATH + "events.ts"
     private const val WINDOW_DECLARE_FILE_DEST = CLIENT_FOLDER_PATH + "window.d.ts"
 
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = LoggerFactory.getLogger(this::class.java.simpleName)
 
     init {
         FileManager.createOrReplaceFile(TYPES_FILE_PATH)
@@ -24,6 +26,7 @@ object CodeGenerator {
     }
 
     fun generateEventsAPI() {
+
         try {
             FileManager.createOrReplaceFile(EVENTS_API_FILE_DEST)
             FileManager.createOrReplaceFile(WINDOW_DECLARE_FILE_DEST)
