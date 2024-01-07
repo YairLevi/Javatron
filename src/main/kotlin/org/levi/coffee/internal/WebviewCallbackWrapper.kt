@@ -1,4 +1,4 @@
-package com.example.pkg
+package org.levi.coffee.internal
 
 import co.casterlabs.rakurai.json.Rson
 import co.casterlabs.rakurai.json.element.JsonArray

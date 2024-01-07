@@ -1,6 +1,6 @@
-package com.example.pkg
+package org.levi.coffee.internal
 
-import com.example.pkg.annotations.BindMethod
+import org.levi.coffee.annotations.BindMethod
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException

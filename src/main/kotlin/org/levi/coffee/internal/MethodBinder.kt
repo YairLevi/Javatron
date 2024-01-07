@@ -1,6 +1,6 @@
-package com.example.pkg
+package org.levi.coffee.internal
 
-import com.example.pkg.annotations.BindMethod
+import org.levi.coffee.annotations.BindMethod
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 import dev.webview.Webview

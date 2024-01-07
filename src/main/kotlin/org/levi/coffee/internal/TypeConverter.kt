@@ -1,4 +1,4 @@
-package com.example.pkg
+package org.levi.coffee.internal
 
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Type

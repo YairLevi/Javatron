@@ -1,4 +1,4 @@
-package com.example.pkg
+package org.levi.coffee
 
 import org.slf4j.LoggerFactory
 import com.google.gson.Gson

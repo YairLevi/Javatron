@@ -1,4 +1,4 @@
-package com.example.pkg.annotations;
+package org.levi.coffee.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
