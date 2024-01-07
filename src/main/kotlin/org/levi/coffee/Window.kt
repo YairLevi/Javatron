@@ -48,7 +48,7 @@ class Window (withDevTools: Boolean = true) {
     }
 
     fun bind(vararg objects: Any) {
-        _bindObjects.addAll(Arrays.stream(objects).toList())
+        _bindObjects.addAll(objects)
     }
 
     fun addBeforeStartCallback(r: Runnable) {
