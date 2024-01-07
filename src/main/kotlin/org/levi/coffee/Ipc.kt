@@ -8,9 +8,11 @@ object Ipc {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val gson = Gson()
     private lateinit var webview: Webview
+
     fun setWebview(webview: Webview) {
         Ipc.webview = webview
     }
+
     fun invoke(event: String, vararg args: Any?) {
         try {
             val argsJson = gson.toJson(args)
